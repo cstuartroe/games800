@@ -1,0 +1,1 @@
+web: gunicorn games800.wsgi
