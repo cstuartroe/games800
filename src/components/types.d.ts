@@ -3,7 +3,17 @@ export type User = {
   screen_name: string,
 }
 
-type Game = {
-  slug: string,
-  title: string,
+export type Game = string
+
+export type GameInstance = {
+  id: number,
+  game: Game,
+  participants: User[],
+  accepting_joins: boolean,
+}
+
+export type Score = {
+  player: User,
+  gameInstance: GameInstance,
+  value: number,
 }
