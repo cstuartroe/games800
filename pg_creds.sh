@@ -1,3 +1,4 @@
+export DJANGO_SECRET=$(heroku config:get DJANGO_SECRET)
 export PG_HOST=$(heroku config:get PG_HOST)
 export PG_DB=$(heroku config:get PG_DB)
 export PG_USER=$(heroku config:get PG_USER)
