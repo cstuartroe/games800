@@ -32,7 +32,7 @@ class MakeGuesses extends Component<Props, State> {
   index() {
     let out = 0;
     this.props.guesses.map((guess) => {
-      if (guess.guesser == this.props.user) {
+      if (guess.guesser.username == this.props.user.username) {
         out++;
       }
     });
@@ -95,11 +95,11 @@ class MakeGuesses extends Component<Props, State> {
     if (index > 0) {
       const prevImageSubmission = submissions[index-1];
 
-      const prevGuesses = guesses.filter(guess => guess.imageSubmission == prevImageSubmission);
+      const prevGuesses = guesses.filter(guess => guess.imageSubmission.id == prevImageSubmission.id);
 
       if (prevGuesses.length != participants.length) {
         const awaiting = participants.filter(p => !prevGuesses.some(guess => (
-          guess.guesser == p
+          guess.guesser.username == p.username
         )))
         return <Awaiting
           update={fetchGuesses}
