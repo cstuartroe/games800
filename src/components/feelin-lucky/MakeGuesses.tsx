@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import Awaiting from "./Awaiting";
+import { WaitingList } from "./Awaiting";
 import { User, GameInstance } from "../types";
 import { Submission, Guess } from "./types";
 
@@ -29,10 +29,21 @@ class MakeGuesses extends Component<Props, State> {
     };
   }
 
+  haventGuessedOn(imageSubmission: Submission) {
+    const { participants, guesses } = this.props;
+
+    const prevGuesses = guesses.filter(guess => guess.imageSubmission.id == imageSubmission.id);
+
+    return participants.filter(p => !(
+      prevGuesses.some(guess => (guess.guesser.username == p.username))
+      || imageSubmission.author.username == p.username
+    ))
+  }
+
   index() {
     let out = 0;
-    this.props.guesses.map((guess) => {
-      if (guess.guesser.username == this.props.user.username) {
+    this.props.submissions.map((sub) => {
+      if (this.haventGuessedOn(sub).length == 0) {
         out++;
       }
     });
@@ -80,6 +91,7 @@ class MakeGuesses extends Component<Props, State> {
 
   render() {
     const {
+      user,
       submissions,
       participants,
       guesses,
@@ -92,27 +104,24 @@ class MakeGuesses extends Component<Props, State> {
 
     const index = this.index();
 
-    if (index > 0) {
-      const prevImageSubmission = submissions[index-1];
-
-      const prevGuesses = guesses.filter(guess => guess.imageSubmission.id == prevImageSubmission.id);
-
-      if (prevGuesses.length != participants.length) {
-        const awaiting = participants.filter(p => !prevGuesses.some(guess => (
-          guess.guesser.username == p.username
-        )))
-        return <Awaiting
-          update={fetchGuesses}
-          awaiting={awaiting}
-        />;
-      }
-    }
-
     const imageSubmission = submissions[index];
 
-    const my_guesses = this.props.guesses.filter(guess => guess.guesser.username == this.props.user.username);
-    const authors_already_guessed = my_guesses.map(guess => guess.author.username);
-    const queries_already_guessed = my_guesses.map(guess => guess.searchSubmission.id);
+    const my_guesses = guesses.filter(guess => guess.guesser.username == user.username);
+    const alreadyGuessed = my_guesses.some(guess =>
+      guess.imageSubmission.id == imageSubmission.id
+    )
+
+    const authorsNotAlreadyGuessed = participants
+      .filter(p => !my_guesses.some(guess =>
+        guess.author.username == p.username
+      ))
+      .sort()
+
+    const searchSubmissionsNotAlreadyGuessed = submissions
+      .filter(sub => !my_guesses.some(guess =>
+        guess.searchSubmission.id == sub.id
+      ))
+      .sort()
 
     return <div className="row">
       <div className = "col-0 col-sm-1 col-md-2 col-lg-3"/>
@@ -126,23 +135,36 @@ class MakeGuesses extends Component<Props, State> {
       </div>
       <div className = "col-0 col-sm-1 col-md-2 col-lg-3"/>
 
-      <div className = "col-6">
-        {participants.filter(p => !authors_already_guessed.includes(p.username)).sort().map((p) =>
-          <div key={p.username}>
-            <input type="radio" name="author" onClick={() => this.setStateAndSubmit({author: p})} />
-            <p>{p.screen_name}</p>
+      {!alreadyGuessed &&
+      <div className="col-6">
+        {authorsNotAlreadyGuessed.map((author) =>
+          <div key={author.username}>
+            <input type="radio" name="author" onClick={() => this.setStateAndSubmit({author})}/>
+            <p>{author.screen_name}</p>
           </div>
         )}
       </div>
+      }
 
-      <div className = "col-6">
-        {submissions.filter(sub => !queries_already_guessed.includes(sub.id)).sort().map((sub) =>
+      {!alreadyGuessed &&
+      <div className="col-6">
+        {searchSubmissionsNotAlreadyGuessed.map((sub) =>
           <div key={sub.id}>
-            <input type="radio" name="search_query"  onClick={() => this.setStateAndSubmit({searchSubmission: sub})}/>
+            <input type="radio" name="search_query" onClick={() => this.setStateAndSubmit({searchSubmission: sub})}/>
             <p>{sub.searchQuery}</p>
           </div>
         )}
       </div>
+      }
+
+      {alreadyGuessed &&
+      <div className="col-12">
+        <WaitingList
+          update={fetchGuesses}
+          awaiting={this.haventGuessedOn(imageSubmission)}
+        />
+      </div>
+      }
     </div>;
   }
 }
