@@ -21,14 +21,6 @@ type State = {
   message: null | string,
 }
 
-function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K> {
-  const ret: any = {};
-  keys.forEach(key => {
-    ret[key] = obj[key];
-  })
-  return ret;
-}
-
 
 class FeelinLucky extends Component<Props, State> {
   constructor(props: Props) {
@@ -112,10 +104,10 @@ class FeelinLucky extends Component<Props, State> {
         />;
 
       } else {
-        console.log(this.state.participants);
-
         const awaiting = this.state.participants.filter(p => (
-          !this.state.submissions.some(sub => sub.author.username == p.username)
+          !this.state.submissions.some(sub => (
+            sub.author.username == p.username && sub.chosen !== null
+          ))
         ))
         return <Awaiting
           update={this.fetchSubmissions.bind(this)}
