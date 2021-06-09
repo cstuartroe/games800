@@ -21,6 +21,10 @@ type State = {
   message: null | string,
 }
 
+function hash(n: number) {
+  return Math.pow(61, n) % 67
+}
+
 
 class FeelinLucky extends Component<Props, State> {
   constructor(props: Props) {
@@ -50,10 +54,10 @@ class FeelinLucky extends Component<Props, State> {
 
   fetchSubmissions() {
     this.generalizedFetch('feelin_lucky/submissions?gameInstance=' + this.props.gameInstance.id)
-      .then((data: any) => {
+      .then((data: { all_submissions: boolean, submissions: Submission[] }) => {
         this.setState({
           all_submissions: data.all_submissions,
-          submissions: data.submissions.sort(),
+          submissions: data.submissions.sort((a, b) => hash(a.id) - hash(b.id)),
         });
       });
 
