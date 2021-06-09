@@ -71,6 +71,8 @@ def select(request):
         if all_chosen:
             game_instance.close()
 
+        Score.add_score(user, game_instance, 0)
+
         return HttpResponse()
 
 
