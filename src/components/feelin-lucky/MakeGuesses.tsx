@@ -134,13 +134,13 @@ class MakeGuesses extends Component<Props, State> {
       .filter(p => !my_guesses.some(guess =>
         guess.author.username == p.username
       ))
-      .sort()
+      .sort((u1, u2) => u1.screen_name.localeCompare(u2.screen_name))
 
     const searchSubmissionsNotAlreadyGuessed = submissions
       .filter(sub => !my_guesses.some(guess =>
         guess.searchSubmission.id == sub.id
       ))
-      .sort()
+      .sort((s1, s2) => s1.searchQuery.localeCompare(s2.searchQuery))
 
     return <div className="row">
       <div className = "col-0 col-sm-1 col-md-2 col-lg-3"/>
