@@ -83,14 +83,13 @@ class FeelinLucky extends Component<Props, State> {
     });
   }
 
-  fetchGuesses() {
+  fetchGuesses(callback?: () => void) {
     this.generalizedFetch("feelin_lucky/guess?gameInstance=" + this.props.gameInstance.id)
-      .then((guesses: Guess[]) => this.setState({ guesses: guesses.sort() }));
+      .then((guesses: Guess[]) => this.setState({ guesses: guesses.sort() }, callback));
   }
 
   componentDidMount() {
     this.fetchSubmissions();
-    this.fetchGuesses();
   }
 
   render() {

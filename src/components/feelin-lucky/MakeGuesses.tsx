@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { WaitingList } from "./Awaiting";
+import Awaiting, { WaitingList } from "./Awaiting";
 import { User, GameInstance } from "../types";
 import { Submission, Guess } from "./types";
 
@@ -8,7 +8,7 @@ type Props = {
   user: User,
   gameInstance: GameInstance,
   submissions: Submission[],
-  fetchGuesses: () => void,
+  fetchGuesses: (callback?: () => void) => void,
   participants: User[],
   guesses: Guess[],
 }
@@ -17,6 +17,7 @@ type State = {
   message?: string,
   searchSubmission?: Submission,
   author?: User,
+  submitting: boolean,
 }
 
 class MakeGuesses extends Component<Props, State> {
@@ -26,7 +27,12 @@ class MakeGuesses extends Component<Props, State> {
       message: undefined,
       searchSubmission: undefined,
       author: undefined,
+      submitting: true,
     };
+  }
+
+  componentDidMount() {
+    this.props.fetchGuesses(() => this.setState({submitting: false}));
   }
 
   haventGuessedOn(imageSubmission: Submission) {
@@ -36,7 +42,6 @@ class MakeGuesses extends Component<Props, State> {
 
     return participants.filter(p => !(
       prevGuesses.some(guess => (guess.guesser.username == p.username))
-      || imageSubmission.author.username == p.username
     ))
   }
 
@@ -51,21 +56,35 @@ class MakeGuesses extends Component<Props, State> {
     return out;
   }
 
-  setStateAndSubmit(o: {author?: User, searchSubmission?: Submission}) {
-    this.setState(o, () => {
-      if (this.state.author != undefined && this.state.searchSubmission != undefined) {
-        this.submitGuess();
-      }
-    });
+  currentImageSubmission() {
+    return this.props.submissions[this.index()];
   }
 
-  submitGuess() {
-    const imageSubmission = this.props.submissions[this.index()];
+  setStateAndSubmit(o: {author?: User, searchSubmission?: Submission}) {
+    const currentImageSubmission = this.currentImageSubmission();
+    const username = this.props.user.username;
+    const isCurrentAuthor = currentImageSubmission.author.username == username;
+
+    let data: typeof o = {}
+    if ((o.author != undefined) && ((username == o.author.username) == isCurrentAuthor)) {
+      data.author = o.author;
+    }
+    if ((o.searchSubmission != undefined) && ((username == o.searchSubmission.author.username) == isCurrentAuthor)) {
+      data.searchSubmission = o.searchSubmission;
+    }
+
+    this.setState(data, this.maybeSubmitGuess.bind(this));
+  }
+
+  maybeSubmitGuess() {
+    const imageSubmission = this.currentImageSubmission();
     const { author, searchSubmission } = this.state;
 
-    if (typeof author == "undefined" || typeof searchSubmission == "undefined") {
+    if (author == undefined || searchSubmission == undefined) {
       return;
     }
+
+    this.setState({submitting: true})
 
     fetch("feelin_lucky/guess", {
       method: "POST",
@@ -84,7 +103,7 @@ class MakeGuesses extends Component<Props, State> {
           author: undefined,
           searchSubmission: undefined,
         });
-        this.props.fetchGuesses();
+        this.props.fetchGuesses(() => this.setState({submitting: false}));
       }
     });
   }
@@ -98,13 +117,13 @@ class MakeGuesses extends Component<Props, State> {
       fetchGuesses,
     } = this.props;
 
+    const { submitting } = this.state;
+
     if (submissions.length == 0) {
       return <p>Loading...</p>;
     }
 
-    const index = this.index();
-
-    const imageSubmission = submissions[index];
+    const imageSubmission = this.currentImageSubmission();
 
     const my_guesses = guesses.filter(guess => guess.guesser.username == user.username);
     const alreadyGuessed = my_guesses.some(guess =>
@@ -135,29 +154,47 @@ class MakeGuesses extends Component<Props, State> {
       </div>
       <div className = "col-0 col-sm-1 col-md-2 col-lg-3"/>
 
-      {!alreadyGuessed &&
+      {!(alreadyGuessed || submitting) &&
       <div className="col-6">
         {authorsNotAlreadyGuessed.map((author) =>
           <div key={author.username}>
-            <input type="radio" name="author" onClick={() => this.setStateAndSubmit({author})}/>
+            <input
+              type="radio"
+              name="author"
+              checked={this.state.author?.username == author.username}
+              readOnly={true}
+              onClick={() => this.setStateAndSubmit({author})}
+            />
             <p>{author.screen_name}</p>
           </div>
         )}
       </div>
       }
 
-      {!alreadyGuessed &&
+      {!(alreadyGuessed || submitting) &&
       <div className="col-6">
         {searchSubmissionsNotAlreadyGuessed.map((sub) =>
           <div key={sub.id}>
-            <input type="radio" name="search_query" onClick={() => this.setStateAndSubmit({searchSubmission: sub})}/>
+            <input
+              type="radio"
+              name="search_query"
+              checked={this.state.searchSubmission?.id == sub.id}
+              readOnly={true}
+              onClick={() => this.setStateAndSubmit({searchSubmission: sub})}
+            />
             <p>{sub.searchQuery}</p>
           </div>
         )}
       </div>
       }
 
-      {alreadyGuessed &&
+      {submitting &&
+        <div className="col-12">
+          <Awaiting awaiting={[]} update={() => {}}/>
+        </div>
+      }
+
+      {(alreadyGuessed && !submitting) &&
       <div className="col-12">
         <WaitingList
           update={fetchGuesses}

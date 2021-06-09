@@ -22,6 +22,10 @@ export class WaitingList extends Component<Props, State> {
   }
 
   render() {
+    if (this.props.awaiting.length == 0) {
+      return null;
+    }
+
     return <p>
       {'Waiting for '}
       {this.props.awaiting
