@@ -21,8 +21,18 @@ type State = {
   message: null | string,
 }
 
+function modexp(base: number, exp: number, mod: number): number {
+  if (exp == 0) {
+    return 1;
+  } else if (exp % 2 == 0) {
+    return modexp((base * base) % mod, exp/2, mod);
+  } else {
+    return (base * modexp(base, exp - 1, mod)) % mod;
+  }
+}
+
 function hash(n: number) {
-  return Math.pow(61, n) % 67
+  return modexp(61, n, 67);
 }
 
 
