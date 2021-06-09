@@ -21,13 +21,7 @@ class FeelinLuckySubmission(models.Model):
         ]
 
     def to_json(self):
-        try:
-            chosen = FeelinLuckyCandidate.objects.get(
-                submission=self,
-                chosen=True,
-            )
-        except FeelinLuckyCandidate.DoesNotExist:
-            chosen = None
+        chosen = self.chosen_one()
 
         return {
             "id": self.id,
@@ -37,6 +31,15 @@ class FeelinLuckySubmission(models.Model):
             "candidates": [c.to_json() for c in self.candidates.all()],
             "chosen": chosen and chosen.to_json()
         }
+
+    def chosen_one(self):
+        try:
+            return FeelinLuckyCandidate.objects.get(
+                submission=self,
+                chosen=True,
+            )
+        except FeelinLuckyCandidate.DoesNotExist:
+            return None
 
     def add_candidates(self, candidates: List[str]):
         for candidate in candidates:

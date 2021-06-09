@@ -60,7 +60,16 @@ def select(request):
         filename = body.get("selection")
         sub.choose_candidate_by_name(filename)
 
-        game_instance.close()
+        all_chosen = True
+        for participant in game_instance.participants.all():
+            try:
+                sub = FeelinLuckySubmission.objects.get(author=participant, game_instance=game_instance)
+                all_chosen = all_chosen and (sub.chosen_one() is not None)
+            except FeelinLuckySubmission.DoesNotExist:
+                all_chosen = False
+
+        if all_chosen:
+            game_instance.close()
 
         return HttpResponse()
 
