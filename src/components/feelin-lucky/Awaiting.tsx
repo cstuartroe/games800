@@ -10,7 +10,7 @@ type State = {
   loop?: NodeJS.Timeout,
 }
 
-class Awaiting extends Component<Props, State> {
+export class WaitingList extends Component<Props, State> {
   componentDidMount() {
     this.props.update();
     this.setState({ loop: setInterval(this.props.update, 5000)});
@@ -22,17 +22,23 @@ class Awaiting extends Component<Props, State> {
   }
 
   render() {
+    return <p>
+      {'Waiting for '}
+      {this.props.awaiting
+        .map(p => p.screen_name)
+        .join(", ")
+      }
+      {'...'}
+    </p>
+  }
+}
+
+class Awaiting extends Component<Props, {}> {
+  render() {
     return <div className="row">
       <div className = "col-12">
-        <p>
-          {'Waiting for '}
-          {this.props.awaiting
-            .map(p => p.screen_name)
-            .join(", ")
-          }
-          {'...'}
-        </p>
         <img src="/static/img/loading.gif"/>
+        <WaitingList {...this.props}/>
       </div>
     </div>;
   }

@@ -130,7 +130,9 @@ class FeelinLucky extends Component<Props, State> {
       }
 
     } else {
-      if (this.state.guesses.length != Math.pow(this.state.submissions.length, 2)) {
+      const { guesses, submissions } = this.state;
+
+      if (guesses.length != submissions.length * (submissions.length - 1)) {
         return <MakeGuesses
           user={this.props.user}
           gameInstance={this.props.gameInstance}
