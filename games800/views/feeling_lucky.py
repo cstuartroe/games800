@@ -1,4 +1,4 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 import os
 import giphy_client
@@ -71,6 +71,8 @@ def select(request):
         if all_chosen:
             game_instance.close()
 
+        Score.add_score(user, game_instance, 0)
+
         return HttpResponse()
 
 
@@ -114,6 +116,9 @@ def guess(request):
         image_submission = FeelinLuckySubmission.objects.get(id=body.get("imageSubmission"))
         search_submission = FeelinLuckySubmission.objects.get(id=body.get("searchSubmission"))
         game_instance = image_submission.game_instance
+
+        if guesser == image_submission.author:
+            return HttpResponseBadRequest("You cannot guess on your own image")
 
         guess = FeelinLuckyGuess(
             guesser=guesser,
