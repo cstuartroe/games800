@@ -1,5 +1,4 @@
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import os
 import giphy_client
 
@@ -10,7 +9,6 @@ from .utils import parsed_body
 GIPHY_SEARCH_API_KEY = os.getenv("GIPHY_SEARCH_API")
 
 
-@csrf_exempt
 def search(request):
     if request.method == "POST":
         body = parsed_body(request)
@@ -48,7 +46,6 @@ def search(request):
             return JsonResponse({"message": "Too few GIF results found."}, status=400)
 
 
-@csrf_exempt
 def select(request):
     if request.method == "POST":
         body = parsed_body(request)
@@ -76,7 +73,6 @@ def select(request):
         return HttpResponse()
 
 
-@csrf_exempt
 def submissions(request):
     if request.method == "GET":
         game_instance = GameInstance.objects.get(id=request.GET.get("gameInstance"))
@@ -93,7 +89,6 @@ def submissions(request):
         return JsonResponse(response)
 
 
-@csrf_exempt
 def guess(request):
     if request.method == "GET":
         try:

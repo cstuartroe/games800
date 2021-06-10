@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from random import randrange
 
@@ -18,7 +17,6 @@ def users(request):
         return JsonResponse(userlist, safe=False)
 
 
-@csrf_exempt
 def new_game(request):
     if request.method == "POST":
         body = parsed_body(request)
@@ -37,7 +35,6 @@ def new_game(request):
         return JsonResponse(gi.to_json())
 
 
-@csrf_exempt
 def join_game(request):
     if request.method == "POST":
         body = parsed_body(request)
@@ -58,7 +55,6 @@ def join_game(request):
         return JsonResponse({"accepted": True, "gameInstance": gameInstance.to_json()})
 
 
-@csrf_exempt
 def participants(request):
     if request.method == "GET":
         try:
@@ -70,7 +66,6 @@ def participants(request):
         return JsonResponse(all_participants, safe=False, status=200)
 
 
-@csrf_exempt
 def scores(request):
     if request.method == "GET":
         try:
