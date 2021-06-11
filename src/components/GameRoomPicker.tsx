@@ -4,7 +4,7 @@ import { User, GameInstance } from "./types";
 
 type Props = {
   user?: User,
-  game?: string,
+  game: string,
   setGameInstance: (gameInstance: GameInstance) => void
 }
 
@@ -42,7 +42,6 @@ class GameRoomPicker extends Component<Props, State> {
       method: "POST",
       body: JSON.stringify({
         username: this.props.user?.username,
-        game: this.props.game,
         gameInstance: this.state.currentInstanceId,
       }),
       headers: { "Content-Type": "application/json" }
