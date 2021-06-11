@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class DjangoHerokuReactTemplateConfig(AppConfig):
+class Games800Config(AppConfig):
     name = 'games800'

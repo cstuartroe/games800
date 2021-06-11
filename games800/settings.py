@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'games800.apps.DjangoHerokuReactTemplateConfig',
+    'games800.apps.Games800Config',
 ]
 
 MIDDLEWARE = [
