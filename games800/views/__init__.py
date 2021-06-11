@@ -1,9 +1,9 @@
 from .general import (
     react_index,
-    users,
-    new_game,
-    join_game,
-    participants,
-    scores,
+    UsersView,
+    NewGameView,
+    JoinGameView,
+    ParticipantsView,
+    ScoresView,
 )
 from . import feeling_lucky
